@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+// 拿到vuex实例store 因为这是路由实例不是vue组件，这里的store是this.$store
 import store from '@/store'
+console.log(store)
 // 路由的按需导入 定义常量为函数名，赋值箭头函数，执行到component是常量，vue就会内部调用
 // 布局组件(一)
 const Layout = () => import('@/views/layout.vue')
@@ -24,6 +26,13 @@ const Result = () => import('@/views/search/result.vue')
 // 详情
 const Article = () => import('@/views/article/index.vue')
 const NotFound = () => import('@/views/NotFound')
+// 注册之前
+// 解决Vue-Router升级导致的Uncaught(in promise) navigation guard问题
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push (location, onResolve, onReject) {
+  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+  return originalPush.call(this, location).catch(err => err)
+}
 
 Vue.use(VueRouter)
 
@@ -119,13 +128,26 @@ const router = new VueRouter({
 })
 
 // 路由守卫=>前置守卫 地址 /user 开头的路径，检查是否登录。
+/** router.beforeEach(回调函数)
+ * 控制以/user开头的页面都需要token才能访问
+ *to 去
+ *from 来
+ *next放行 默认是全拦截 *从vuex中获取token,必须有token无的话跳转到登录 依然可以跳转
+ * next({ path:'/xxx' , query:{}}) 携带参数跳到xxx页面 登录后继续跳转指定页面
+
+ 最好不要直接修改本地 ，他是最终结果，用vuex去获取修改
+ *
+*/
 router.beforeEach((to, from, next) => {
   // 获取token信息
   const { user } = store.state
-  console.log(user)
+  // console.log(user)
+  // redirectUrl自定义
   const loginConfig = { path: '/login', query: { redirectUrl: to.path } }
-  if (to.path.startsWith('/user') && !user?.token) {
+  if (to.path.startsWith === '/user' && !user.token) {
+    // 登录完成后返回之前的页面 配置前是返回主页面，登录后让用户继续浏览之前的页面
     next(loginConfig)
+    // next(`/login?redirectUrl=${to.path}`)
   } else {
     next()
   }

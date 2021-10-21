@@ -3,19 +3,16 @@
     <!-- 头部 -->
     <!-- 当路由地址（path === $route.path）不是`我的`才显示 -->
     <van-nav-bar
-      v-if="isShowNav"
+      v-if="$route.path !== '/user'"
       title="首页"
       fixed
-      left-text="返回"
       right-text="搜索"
-      left-arrow
-      @click-left="$router.back()"
       @click-right="$router.push('/search')"
     />
 
     <!-- 中 -->
     <!-- 中间内容：二级路由挂载点=》注意容器样式添加 -->
-    <div class="my-wrapper" :class="{ noTop: !isShowNav }">
+    <div class="my-wrapper" :class="{noTop:$route.path === '/user'}">
       <router-view></router-view>
     </div>
     <!-- 下 -->
@@ -35,12 +32,12 @@ export default {
     return {
       active: 0
     }
-  },
-  computed: {
-    isShowNav () {
-      return this.$route.path !== '/user'
-    }
   }
+  // computed: {
+  //   isShowNav () {
+  //     return this.$route.path !== '/user'
+  //   }
+  // }
 
 }
 </script>
