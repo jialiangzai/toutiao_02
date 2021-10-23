@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 // 拿到vuex实例store 因为这是路由实例不是vue组件，这里的store是this.$store
 import store from '@/store'
-console.log(store)
+// console.log(store)
 // 路由的按需导入 定义常量为函数名，赋值箭头函数，执行到component是常量，vue就会内部调用
 // 布局组件(一)
 const Layout = () => import('@/views/layout.vue')

@@ -14,6 +14,7 @@
 import axios from 'axios'
 // import JSONBIGINT from 'json-bigint'
 import store from '../store'
+import router from '@/router'
 const MyAxios = axios.create({
   baseURL: 'http://geek.itheima.net/v1_0/'
   // transformResponse: [function (data) {
@@ -59,11 +60,43 @@ MyAxios.interceptors.response.use(function (response) {
     status: response.status,
     data: response.data.data
   }
-}, function (error) {
+}, async function (error) {
   // Any status codes that falls outside the range of 2xx cause this function to trigger
   // Do something with response error
   // error错误对象在控制台显示必须是dir，否则显示不全
   console.dir(error)
+  // 超出 2xx 范围的状态码都会触发该函数。=>例如：401会进入这里
+  // 不可控的代码执行加try catch 增强代码的健壮性
+  const loginPath = `/login?redirectUrl=${router.currentRoute.path} `
+  try {
+    // 401报错情况  分为有token(登陆过)和没token(没登陆过)
+    /** 401报错 首先是在它的状态码401且有err.request     *
+    */
+    //  路由模块已经配置过要一致query参数 获取当前访问地址(401地址)
+    if (error.request.status === 401 && error.response) {
+      // * 没有token没登陆过跳转登录页面(带上上次访问页面的地址)
+      // 获取token
+      const { user } = store.state
+      if (!user.token || !user.refresh_token) {
+        // 跳转到登录页面 没有登录就不记录之前的记录直接替换就行,登录带着参数作用：登陆完可以跳转到指定的页面
+        router.replace(loginPath)
+        return Promise.reject(error)
+        // throw new Error(error);
+      }
+      // * 登陆有token只不过过期了 ，要刷新token, 重新发送上次401的请求
+      const { data } = await MyAxios({ url: 'authorizations', method: 'PUT', headers: { Authorization: `Bearer ${user.refresh_token} ` } })
+      // * 全部都过期跳转到登录页面(带上上次访问页面的地址)
+      console.log('刷新用户请求', data)
+      // 存储到本地讲究
+      store.commit('setToken', { token: data.token, refresh_token: user.refresh_token })
+      // 重新发送上次401的请求 无感
+      return MyAxios(error.config)
+    }
+  } catch (error) {
+    // token过期了，refresh_token过期了 =》跳转回登录页面（带上上次访问页面的地址）
+    router.replace(loginPath)
+    return Promise.reject(error)
+  }
   return Promise.reject(error)
 })
 

@@ -53,6 +53,9 @@ export default {
       pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/
     }
   },
+  created () {
+    console.log(this.$route.query.redirectUrl)
+  },
   methods: {
     ...mapActions(['getToken']),
     // 表示已经验证通过
@@ -75,8 +78,14 @@ export default {
         // this.$toast('登录成功')
         this.$toast.success('登录成功')
         // 跳转首页
-        this.$router.push({ name: 'index' })
+        //   * 校验通过=>登录
+        //  * 1. 调用vuex的action发送登录请求
+        //  * 2. 成功跳转首页
+        // this.$route.query.redirectUrl存在
+        // 就跳这个地址，不存在就跳转首页
+        this.$router.push(this.$route.query.redirectUrl || '/')
       } catch (error) {
+        // error对象需要通过console.dir才能看到里边的属性和值
         console.dir(error)
         this.$toast.fail(error.response.data.message)
       }
