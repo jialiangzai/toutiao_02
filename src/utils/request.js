@@ -25,7 +25,7 @@ const MyAxios = axios.create({
   //     // 处理JSON.parse/stringify精度丢失
   //     // test:console.log(JSONBIGINT.parse('{"a":9223372036854775807}').a.toString(), JSON.parse('{"a":9223372036854775807}'))
 
-  //     return JSONBIGINT.parse(data)
+  //     return JSONBIGINT.parse(data).a.toString()
   //   } catch (e) {
   //     return data
   //   }
@@ -73,13 +73,14 @@ MyAxios.interceptors.response.use(function (response) {
     /** 401报错 首先是在它的状态码401且有err.request     *
     */
     //  路由模块已经配置过要一致query参数 获取当前访问地址(401地址)
-    if (error.request.status === 401 && error.response) {
+    if (error.response.status === 401 && error.response) {
       // * 没有token没登陆过跳转登录页面(带上上次访问页面的地址)
       // 获取token
       const { user } = store.state
       if (!user.token || !user.refresh_token) {
         // 跳转到登录页面 没有登录就不记录之前的记录直接替换就行,登录带着参数作用：登陆完可以跳转到指定的页面
         router.replace(loginPath)
+        // return 终止代码，Promise.reject(error)规范错误处理用catch捕获也可用throw
         return Promise.reject(error)
         // throw new Error(error);
       }
@@ -90,6 +91,7 @@ MyAxios.interceptors.response.use(function (response) {
       // 存储到本地讲究
       store.commit('setToken', { token: data.token, refresh_token: user.refresh_token })
       // 重新发送上次401的请求 无感
+      // console.dir(error)
       return MyAxios(error.config)
     }
   } catch (error) {

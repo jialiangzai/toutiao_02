@@ -12,7 +12,7 @@
 
     <!-- 中 -->
     <!-- 中间内容：二级路由挂载点=》注意容器样式添加 -->
-    <div class="my-wrapper" :class="{noTop:$route.path === '/user'}">
+    <div class="my-wrapper" :class="{ noTop: $route.path === '/user' }">
       <router-view></router-view>
     </div>
     <!-- 下 -->
@@ -54,6 +54,9 @@ export default {
     padding-top: 46px;
     padding-bottom: 50px;
     box-sizing: border-box;
+    /deep/.van-overlay {
+      background-color: #fff;
+    }
     &.noTop {
       padding-top: 0;
     }

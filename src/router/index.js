@@ -47,7 +47,11 @@ const routes = [
         path: '/',
         name: 'index',
         // 首页
-        component: Index
+        component: Index,
+        // 开启缓存
+        meta: {
+          isKeepAlive: true
+        }
       },
       {
         path: '/question',
@@ -103,7 +107,11 @@ const routes = [
     path: '/article/:id',
     name: 'article',
     // 文章详情
-    component: Article
+    component: Article,
+    // 开启缓存
+    meta: {
+      isKeepAlive: true
+    }
   },
   {
     path: '*',

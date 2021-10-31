@@ -8,7 +8,16 @@
 
 <script>
 export default {
-  name: 'question-index'
+  name: 'question-index',
+  created () {
+    console.log('question组件创建了')
+  },
+  activated () {
+    console.log('question组被缓存了，进入了')
+  },
+  deactivated () {
+    console.log('question组被缓存了，离开了')
+  }
 }
 </script>
 

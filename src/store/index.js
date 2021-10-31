@@ -6,6 +6,7 @@ import * as auth from '@/utils/auth'
 // 获取token是从vuex中取并不是本地，本地的也是从vuex中传递的
 // 导入接口请求方法
 import { login } from '@/api/user'
+import chat from './modules/chat'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -37,5 +38,6 @@ export default new Vuex.Store({
     }
   },
   modules: {
+    chat
   }
 })
